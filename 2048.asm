@@ -239,8 +239,48 @@ endm
 
 ; define macro for collapsing down
 collapse_down_macro MACRO
-    local rowMergeLoop, rowMovement, colMergeLoop, nextRowMergeLoop, colScan, isZero, nextAlsoZero, endColScan
-    
+    local rowMergeLoop, rowMovement, colMergeLoop, nextRowMergeLoop, colScan, isZero, nextAlsoZero, endColScan, rowMovement2, isZero2, colScan2, endColScan2, nextAlsoZero2
+ 	
+	mov ebx, 12
+    mov ecx, 12
+	
+	 
+	rowMovement2:
+		mov ebx,12
+		colScan2:
+			xor edx,edx
+			mov esi, tabla[ebx*4+ecx]
+			mov edx, ebx
+			cmp esi, 0
+			jne endColScan2
+			
+			isZero2:
+
+			sub edx, 4
+			mov edi, tabla[edx*4+ecx]
+			cmp edi,0 
+			je nextAlsoZero2
+					
+				; runs if next diff than 0
+				mov tabla[ebx*4+ecx], edi
+				mov tabla[edx*4+ecx], 0
+				jmp endColScan2
+
+			nextAlsoZero2:
+			cmp edx, 0
+			jg isZero2
+			
+			jmp endColScan2
+
+		endColScan2:
+		sub ebx,4
+		cmp ebx,0
+		jge colScan2
+			
+	sub ecx,4
+	cmp ecx,0
+	jge rowMovement2
+  
 	mov ebx, 12
     mov ecx, 12
 	
