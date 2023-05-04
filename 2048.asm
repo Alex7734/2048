@@ -42,7 +42,7 @@ include digits.inc
 include letters.inc
 
 tabla dd 0,0,0,0
-	  dd 0,0,0,0
+	  dd 0,2,0,0
 	  dd 0,0,0,0
 	  dd 0,0,0,0
 
@@ -62,6 +62,7 @@ pozY dd 80 , 80 , 80 , 80
 	 dd 360, 360, 360, 360
 	 
 
+numOfShifts dd 0
 table dd 0
 RandomNumber dd 0	 
 format db "%d ", 0
@@ -98,9 +99,7 @@ RandomNum proc
 RandomNum endp
 
 GenerateElement macro
-local CheckElement, AddElement, Uncool, AllCool
-	cmp placesLeftEmpty, 0
-	je Uncool
+local CheckElement, AddElement
     mov ecx, 15
     xor ebx, ebx
 CheckElement:
@@ -115,18 +114,9 @@ AddElement:
     cmp [tabla+edx], 0
     jne AddElement
     mov [tabla+edx], 2
-	CountZeros
-	push placesLeftEmpty
-	push offset format
-	call printf
-	add esp, 8
-	jmp AllCool
-
-Uncool:	
 	push offset textFinish
 	call printf
 	add esp, 8
-AllCool:
 endm
 
 
@@ -260,7 +250,7 @@ collapse_down_macro MACRO
 			mov edi, tabla[edx*4+ecx]
 			cmp edi,0 
 			je nextAlsoZero2
-					
+				add numOfShifts, 1
 				; runs if next diff than 0
 				mov tabla[ebx*4+ecx], edi
 				mov tabla[edx*4+ecx], 0
@@ -571,13 +561,10 @@ endm
 ; un macro ce sterge numerele pe tabla
 delete_numbers macro
 	local bucla_linie, bucla_coloana, done, print0, print2, print4, print8, print16, print32, print64, print128, print256, print512, print1024, print2048
-	;call putRandomNumOnBoard
-	;call putRandomNumOnBoard
 	xor eax, eax
 	bucla_linie:
 		xor ecx, ecx
 		bucla_coloana:
-				; logica de afisare pentru 2
 				mov edi, tabla[eax*4+ecx]
 				mov ebx, pozX[eax*4+ecx]
 				mov edx, pozY[eax*4+ecx]
@@ -938,47 +925,77 @@ evt_key:
 	je rightLogic
 	
 upLogic:
+	CountZeros
+	cmp placesLeftEmpty, 0
+	je afisare_litere
 	push eax
 	push offset format
 	call printf
 	add esp, 8
 	delete_numbers
 	collapse_up_macro
+	cmp numOfShifts, 1
+	jle skipGenerate1
 	GenerateElement
+	skipGenerate1:
 	make_numbers
+	push numOfShifts
+	push offset format
+	call printf
+	add esp, 8
+	
 	jmp afisare_litere
 
+
 leftLogic:
+	CountZeros
+	cmp placesLeftEmpty, 0
+	je afisare_litere
 	push eax
 	push offset format
 	call printf
 	add esp, 8
 	delete_numbers
 	collapse_left_macro
+	cmp numOfShifts, 1
+	jle skipGenerate2
 	GenerateElement
+	skipGenerate2:
 	delete_numbers
 	make_numbers
 	jmp afisare_litere
 	
 downLogic:
+	CountZeros
+	cmp placesLeftEmpty, 0
+	je afisare_litere
 	push eax
 	push offset format
 	call printf
 	add esp, 8
 	delete_numbers
 	collapse_down_macro
+	cmp numOfShifts, 1
+	jle skipGenerate3
 	GenerateElement
+	skipGenerate3:
 	make_numbers
 	jmp afisare_litere
 	
 rightLogic:
+	CountZeros
+	cmp placesLeftEmpty, 0
+	je afisare_litere
 	push eax
 	push offset format
 	call printf
 	add esp, 8
 	delete_numbers
 	collapse_right_macro
+	cmp numOfShifts, 1
+	jle skipGenerate4
 	GenerateElement
+	skipGenerate4:
 	make_numbers
 	jmp afisare_litere
 
